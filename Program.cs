@@ -4,14 +4,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace MySimpleWebAPI
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        private static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
             var config = new ConfigurationBuilder()
                 .AddCommandLine(args)

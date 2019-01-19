@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MySimpleWebAPI.Models;
 
 namespace MySimpleWebAPI.Controllers
@@ -16,39 +18,35 @@ namespace MySimpleWebAPI.Controllers
         public TodoController(TodoContext context)
         {
             _context = context;
-            if (_context.TodoItems.Count() == 0)
+            if (!_context.TodoItems.Any())
             {
                 _context.TodoItems.Add(new TodoItem {Name = "Item1"});
                 _context.SaveChanges();
             }
         }
 
+        /// <summary>
+        /// Lists all TodoItems.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        public List<TodoItem> GetAll()
+        public async Task<ActionResult<List<TodoItem>>> GetAll()
         {
-            return _context.TodoItems.ToList();
+            return await _context.TodoItems.ToListAsync();
         }
 
         [HttpGet("{id}", Name = GetRouteName)]
-        public ActionResult<TodoItem> GetById(long id)
+        public async Task<ActionResult<TodoItem>> GetById(long id)
         {
-            var item = _context.TodoItems.Find(id);
+            var item = await _context.TodoItems.FindAsync(id);
             if (item == null)
                 return NotFound();
             return item;
         }
 
         /// <summary>
-        /// Creates a TodoItem
+        /// Creates a new TodoItem
         /// </summary>
-        /// <remarks>
-        ///     POST /todo
-        ///     {
-        ///         "id": 1,
-        ///         "name": "Item1",
-        ///         "isComplete": false
-        ///     }
-        /// </remarks>
         /// <param name="item"></param>
         /// <returns>A newly created TodoItem</returns>
         /// <response code="201">Returns the newly created TodoItem</response>
@@ -56,18 +54,24 @@ namespace MySimpleWebAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public IActionResult Create(TodoItem item)
+        public async Task<IActionResult> Create(TodoItem item)
         {
             _context.TodoItems.Add(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return CreatedAtRoute(GetRouteName, new {id = item.Id}, item);
         }
 
+        /// <summary>
+        /// Updates an already existing TodoItem.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
-        public IActionResult Update(long id, TodoItem item)
+        public async Task<IActionResult> Update(long id, TodoItem item)
         {
-            var todo = _context.TodoItems.Find(id);
+            var todo = await _context.TodoItems.FindAsync(id);
             if (todo == null)
             {
                 return NotFound();
@@ -77,7 +81,7 @@ namespace MySimpleWebAPI.Controllers
             todo.Name = item.Name;
 
             _context.TodoItems.Update(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -86,14 +90,14 @@ namespace MySimpleWebAPI.Controllers
         /// </summary>
         /// <param name="id"></param>
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id)
+        public async Task<IActionResult> Delete(long id)
         {
-            var todo = _context.TodoItems.Find(id);
+            var todo = await _context.TodoItems.FindAsync(id);
             if (todo == null)
                 return NotFound();
 
             _context.TodoItems.Remove(todo);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return NoContent();
         }
     }

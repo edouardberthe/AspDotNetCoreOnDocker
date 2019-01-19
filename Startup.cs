@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MySimpleWebAPI.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
+
+[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace MySimpleWebAPI
 {
     public class Startup
@@ -25,7 +27,7 @@ namespace MySimpleWebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info
